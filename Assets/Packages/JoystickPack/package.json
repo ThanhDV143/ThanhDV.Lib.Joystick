@@ -1,0 +1,26 @@
+{
+    "name": "thanhdv.joystick",
+    "version": "1.0.0",
+    "displayName": "Joystick",
+    "description": "On-screen virtual joystick for Unity UI with four joystick variants (Fixed, Floating, Dynamic, Variable).",
+    "unity": "2021.3",
+    "keywords": [
+        "Touch",
+        "Control",
+        "Joystick"
+    ],
+    "author": {
+        "name": "ThanhDV",
+        "email": "vanthanh1998@gmail.com",
+        "url": "https://knowledge.thanhdv.com/"
+    },
+    "dependencies": {},
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ThanhDV143/ThanhDV.Lib.Joystick.git"
+    },
+    "license": "MIT",
+    "publishConfig": {
+        "registry": "https://upm.thanhdv.com/"
+    }
+}

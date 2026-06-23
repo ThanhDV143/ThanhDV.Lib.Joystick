@@ -1,56 +1,63 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 
-public class FixedTouchField : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+namespace ThanhDV.Joystick
 {
-    [HideInInspector]
-    public Vector2 TouchDist;
-    [HideInInspector]
-    public Vector2 PointerOld;
-    [HideInInspector]
-    protected int PointerId;
-    [HideInInspector]
-    public bool Pressed;
-
-    // Use this for initialization
-    void Start()
+    public class FixedTouchField : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
+        [HideInInspector] public Vector2 TouchDist;
+        [HideInInspector] public Vector2 PointerOld;
+        [HideInInspector] protected int PointerId;
+        [HideInInspector] public bool Pressed;
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Pressed)
+        private void Update()
         {
-            if (PointerId >= 0 && PointerId < Input.touches.Length)
+            if (!Pressed)
             {
-                TouchDist = Input.touches[PointerId].position - PointerOld;
-                PointerOld = Input.touches[PointerId].position;
+                TouchDist = Vector2.zero;
+                return;
             }
-            else
-            {
-                TouchDist = new Vector2(Input.mousePosition.x, Input.mousePosition.y) - PointerOld;
-                PointerOld = Input.mousePosition;
-            }
+
+            Vector2 current = GetPointerPosition();
+            TouchDist = current - PointerOld;
+            PointerOld = current;
         }
-        else
+
+        public void OnPointerDown(PointerEventData eventData)
         {
-            TouchDist = new Vector2();
+            Pressed = true;
+            PointerId = eventData.pointerId;
+            PointerOld = eventData.position;
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            Pressed = false;
+        }
+
+        private Vector2 GetPointerPosition()
+        {
+            // Negative pointerId means mouse (left=-1, right=-2, middle=-3). Non-negative is a touch index.
+            if (PointerId >= 0 && Touchscreen.current != null)
+            {
+                var touches = Touchscreen.current.touches;
+                if (PointerId < touches.Count)
+                {
+                    TouchControl touch = touches[PointerId];
+                    if (touch.press.isPressed)
+                        return touch.position.ReadValue();
+                }
+            }
+
+            if (Mouse.current != null)
+                return Mouse.current.position.ReadValue();
+
+            if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.isPressed)
+                return Touchscreen.current.primaryTouch.position.ReadValue();
+
+            return PointerOld;
         }
     }
-
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        Pressed = true;
-        PointerId = eventData.pointerId;
-        PointerOld = eventData.position;
-    }
-
-
-    public void OnPointerUp(PointerEventData eventData)
-    {
-        Pressed = false;
-    }
-    
 }
