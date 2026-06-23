@@ -1,6 +1,6 @@
 {
     "name": "thanhdv.joystick",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "displayName": "Joystick",
     "description": "On-screen virtual joystick for Unity UI with four joystick variants (Fixed, Floating, Dynamic, Variable).",
     "unity": "2021.3",
