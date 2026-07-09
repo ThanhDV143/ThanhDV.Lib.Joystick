@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
+using UnityEngine.InputSystem.UI;
 
 namespace ThanhDV.Joystick
 {
@@ -10,6 +11,8 @@ namespace ThanhDV.Joystick
         [HideInInspector] public Vector2 TouchDist;
         [HideInInspector] public Vector2 PointerOld;
         [HideInInspector] protected int PointerId;
+        [HideInInspector] protected int TouchId = -1;
+        [HideInInspector] protected bool IsMouse;
         [HideInInspector] public bool Pressed;
 
         private void Update()
@@ -29,33 +32,42 @@ namespace ThanhDV.Joystick
         {
             Pressed = true;
             PointerId = eventData.pointerId;
+            if (eventData is ExtendedPointerEventData ext)
+            {
+                TouchId = ext.touchId;
+                IsMouse = ext.pointerType == UIPointerType.MouseOrPen;
+            }
+            else
+            {
+                TouchId = -1;
+                IsMouse = false;
+            }
             PointerOld = eventData.position;
+            TouchDist = Vector2.zero;
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
             Pressed = false;
+            PointerId = -1;
+            TouchId = -1;
+            IsMouse = false;
+            TouchDist = Vector2.zero;
         }
 
         private Vector2 GetPointerPosition()
         {
-            // Negative pointerId means mouse (left=-1, right=-2, middle=-3). Non-negative is a touch index.
-            if (PointerId >= 0 && Touchscreen.current != null)
+            if (IsMouse && Mouse.current != null)
+                return Mouse.current.position.ReadValue();
+
+            if (Touchscreen.current != null && TouchId > 0)
             {
-                var touches = Touchscreen.current.touches;
-                if (PointerId < touches.Count)
+                foreach (TouchControl touch in Touchscreen.current.touches)
                 {
-                    TouchControl touch = touches[PointerId];
-                    if (touch.press.isPressed)
+                    if (touch.touchId.ReadValue() == TouchId && touch.press.isPressed)
                         return touch.position.ReadValue();
                 }
             }
-
-            if (Mouse.current != null)
-                return Mouse.current.position.ReadValue();
-
-            if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.isPressed)
-                return Touchscreen.current.primaryTouch.position.ReadValue();
 
             return PointerOld;
         }
